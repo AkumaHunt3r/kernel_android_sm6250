@@ -809,6 +809,11 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 			endp++;
 			len -= endp - line;
 			line = endp;
+
+			if (strstr(line, "healthd") ||
+				strstr(line, "logd") ||
+				strncmp(line, "init: Untracked pid", sizeof("init: Untracked pid")))
+				return ret;
 		}
 	}
 
