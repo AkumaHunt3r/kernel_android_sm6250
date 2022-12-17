@@ -1807,9 +1807,20 @@ static ssize_t disksize_store(struct device *dev,
 	struct zram *zram = dev_to_zram(dev);
 	int err;
 
-	disksize = memparse(buf, NULL);
-	if (!disksize)
-		return -EINVAL;
+	struct sysinfo i;
+	static unsigned short create_disksize __read_mostly;
+	static int total_ram;
+
+	si_meminfo(&i);
+	total_ram = i.totalram << (PAGE_SHIFT - 10);
+	if (total_ram > 6144ull * 1024) {
+	  create_disksize = 6;
+	} else if (total_ram > 4096ull * 1024) {
+	  create_disksize = 4;
+	} else {
+	  create_disksize = 2;
+	}
+	disksize = (u64)SZ_1G * create_disksize;
 
 	down_write(&zram->init_lock);
 	if (init_done(zram)) {
