@@ -411,7 +411,7 @@ void mark_page_accessed(struct page *page)
 {
 	page = compound_head(page);
 
-	if (lru_gen_enabled()) {
+	if (likely(lru_gen_enabled())) {
 		page_inc_refs(page);
 		return;
 	}
@@ -445,7 +445,7 @@ static void __lru_cache_add(struct page *page)
 	struct pagevec *pvec = &get_cpu_var(lru_add_pvec);
 
 	/* see the comment in lru_gen_add_page() */
-	if (lru_gen_enabled() && !PageUnevictable(page) && !PageActive(page) &&
+	if (likely(lru_gen_enabled()) && !PageUnevictable(page) && !PageActive(page) &&
 	    lru_gen_in_fault() && !(current->flags & PF_MEMALLOC))
 		SetPageActive(page);
 

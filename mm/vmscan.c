@@ -739,7 +739,7 @@ static int __remove_mapping(struct address_space *mapping, struct page *page,
 	if (PageSwapCache(page)) {
 		swp_entry_t swap = { .val = page_private(page) };
 
-		if (lru_gen_enabled())
+		if (likely(lru_gen_enabled()))
 			shadow = lru_gen_eviction(page);
 		mem_cgroup_swapout(page, swap);
 		__delete_from_swap_cache(page);
@@ -1032,7 +1032,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			goto keep_locked;
 
 		/* page_update_gen() tried to promote this page? */
-		if (lru_gen_enabled() && !force_reclaim &&
+		if (likely(lru_gen_enabled()) && !force_reclaim &&
 		    page_mapped(page) && PageReferenced(page))
 			goto keep_locked;
 
@@ -4544,7 +4544,7 @@ static void lru_gen_change_state(bool enable)
 	get_online_mems();
 	mutex_lock(&state_mutex);
 
-	if (enable == lru_gen_enabled())
+	if (likely(enable == lru_gen_enabled()))
 		goto unlock;
 
 	if (enable)
@@ -4688,7 +4688,7 @@ void lru_gen_init_lruvec(struct lruvec *lruvec)
 	struct lru_gen_struct *lrugen = &lruvec->lrugen;
 
 	lrugen->max_seq = MIN_NR_GENS + 1;
-	lrugen->enabled = lru_gen_enabled();
+	lrugen->enabled = likely(lru_gen_enabled());
 
 	for (i = 0; i <= MIN_NR_GENS + 1; i++)
 		lrugen->timestamps[i] = jiffies;
@@ -4767,7 +4767,7 @@ static void shrink_node_memcg(struct pglist_data *pgdat, struct mem_cgroup *memc
 	struct blk_plug plug;
 	bool scan_adjusted;
 
-	if (lru_gen_enabled()) {
+	if (likely(lru_gen_enabled())) {
 		*lru_pages = lru_gen_shrink_lruvec(lruvec, sc);
 		return;
 	}
@@ -5179,7 +5179,7 @@ static void snapshot_refaults(struct mem_cgroup *root_memcg, pg_data_t *pgdat)
 {
 	struct mem_cgroup *memcg;
 
-	if (lru_gen_enabled())
+	if (likely(lru_gen_enabled()))
 		return;
 
 	memcg = mem_cgroup_iter(root_memcg, NULL, NULL);
@@ -5541,7 +5541,7 @@ static void age_active_anon(struct pglist_data *pgdat,
 {
 	struct mem_cgroup *memcg;
 
-	if (lru_gen_enabled()) {
+	if (likely(lru_gen_enabled())) {
 		lru_gen_age_node(pgdat, sc);
 		return;
 	}

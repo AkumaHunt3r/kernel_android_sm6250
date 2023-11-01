@@ -333,7 +333,7 @@ void *workingset_eviction(struct address_space *mapping, struct page *page)
 	VM_BUG_ON_PAGE(page_count(page), page);
 	VM_BUG_ON_PAGE(!PageLocked(page), page);
 
-	if (lru_gen_enabled())
+	if (likely(lru_gen_enabled()))
 		return lru_gen_eviction(page);
 
 	lruvec = mem_cgroup_lruvec(pgdat, memcg);
@@ -362,7 +362,7 @@ void workingset_refault(struct page *page, void *shadow)
 	bool workingset;
 	int memcgid;
 
-	if (lru_gen_enabled()) {
+	if (likely(lru_gen_enabled())) {
 		lru_gen_refault(page, shadow);
 		return;
 	}

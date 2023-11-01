@@ -1839,7 +1839,7 @@ static int unuse_pte(struct vm_area_struct *vma, pmd_t *pmd,
 	 * Move the page to the active list so it is not
 	 * immediately swapped out again after swapon.
 	 */
-	if (!lru_gen_enabled())
+	if (unlikely(!lru_gen_enabled()))
 		activate_page(page);
 out:
 	pte_unmap_unlock(pte, ptl);
@@ -1989,7 +1989,7 @@ static int unuse_mm(struct mm_struct *mm,
 		 * Activate page so shrink_inactive_list is unlikely to unmap
 		 * its ptes while lock is dropped, so swapoff can make progress.
 		 */
-		if (!lru_gen_enabled())
+		if (unlikely(!lru_gen_enabled()))
 			activate_page(page);
 		unlock_page(page);
 		down_read(&mm->mmap_sem);
