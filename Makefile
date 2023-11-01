@@ -370,9 +370,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 \
+HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 \
 		-fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS)
-HOSTCXXFLAGS := -O2 $(HOST_LFS_CFLAGS)
+HOSTCXXFLAGS := -O3 $(HOST_LFS_CFLAGS)
 HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS)
 HOST_LOADLIBES := $(HOST_LFS_LIBS)
 
@@ -708,8 +708,37 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
+KBUILD_AFLAGS	+= -Os
 else
-KBUILD_CFLAGS   += -O2
+KBUILD_CFLAGS   += -O3
+KBUILD_AFLAGS	+= -O3
+endif
+
+ifeq ($(cc-name),clang)
+INLINE_FLAGS := -mllvm -inline-threshold=2000 \
+	-mllvm -inlinehint-threshold=2000 \
+	-mllvm -unroll-threshold=1200 \
+	-mllvm -import-instr-limit=40
+
+CPU_FLAGS := -march=armv8.2-a+crypto+crc \
+	-mcpu=cortex-a55+crypto+crc
+
+POLLY_FLAGS := -mllvm -polly-ast-use-context \
+	-mllvm -polly-invariant-load-hoisting \
+	-mllvm -polly-run-inliner \
+	-mllvm -polly-vectorizer=stripmine \
+	-mllvm -polly-loopfusion-greedy=1 \
+	-mllvm -polly-reschedule=1 \
+	-mllvm -polly-postopts=1 \
+	-mllvm -polly-scheduling=dynamic \
+	-mllvm -polly-scheduling-chunksize=1
+
+ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
+POLLY_FLAGS += -mllvm -polly-run-dce
+endif
+
+KBUILD_CFLAGS += $(CPU_FLAGS) $(POLLY_FLAGS) $(INLINE_FLAGS)
+KBUILD_AFLAGS += $(CPU_FLAGS) $(POLLY_FLAGS) $(INLINE_FLAGS)
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
@@ -786,7 +815,9 @@ KBUILD_CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks,)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifeq ($(ld-name),lld)
-LDFLAGS += -O2
+ifndef CONFIG_LTO_CLANG
+LDFLAGS += -O3
+endif
 endif
 
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
@@ -879,14 +910,12 @@ endif
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
 lto-clang-flags	:= -flto=thin
-LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
+LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache --lto-O3
 else
 lto-clang-flags	:= -flto
+LDFLAGS		+= --lto-O3
 endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
-
-# Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
