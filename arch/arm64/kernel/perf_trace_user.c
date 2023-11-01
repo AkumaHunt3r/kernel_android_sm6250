@@ -9,6 +9,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#ifdef CONFIG_MINIMAL_TRACING_FOR_IORAP
+#undef NOTRACE
+#endif
+
 #include <linux/perf_event.h>
 #include <linux/types.h>
 #include <linux/tracepoint.h>
