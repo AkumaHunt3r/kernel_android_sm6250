@@ -371,8 +371,8 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
 HOSTCC       = gcc
 HOSTCXX      = g++
 HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 \
-		-fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS)
-HOSTCXXFLAGS := -O3 $(HOST_LFS_CFLAGS)
+		-fomit-frame-pointer -std=gnu89 $(HOST_LFS_CFLAGS) -pipe
+HOSTCXXFLAGS := -O3 $(HOST_LFS_CFLAGS) -pipe
 HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS)
 HOST_LOADLIBES := $(HOST_LFS_LIBS)
 
@@ -707,11 +707,11 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS   += -Os
-KBUILD_AFLAGS	+= -Os
+KBUILD_CFLAGS   += -Os -pipe
+KBUILD_AFLAGS	+= -Os -pipe
 else
-KBUILD_CFLAGS   += -O3
-KBUILD_AFLAGS	+= -O3
+KBUILD_CFLAGS   += -O3 -pipe
+KBUILD_AFLAGS	+= -O3 -pipe
 endif
 
 ifeq ($(cc-name),clang)
