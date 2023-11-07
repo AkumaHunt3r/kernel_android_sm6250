@@ -4914,11 +4914,11 @@ static struct elv_fs_entry cfq_attrs[] = {
 	CFQ_ATTR(slice_idle_us),
 	CFQ_RO_ATTR(group_idle),
 	CFQ_ATTR(group_idle_us),
-	CFQ_ATTR(rt_idle_only),
+	CFQ_RO_ATTR(rt_idle_only),
 	CFQ_ATTR(low_latency),
 	CFQ_ATTR(target_latency),
 	CFQ_ATTR(target_latency_us),
-	CFQ_ATTR(max_async_dispatch),
+	CFQ_RO_ATTR(max_async_dispatch),
 	__ATTR_NULL
 };
 
