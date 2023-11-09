@@ -1755,7 +1755,7 @@ static struct ctl_table vm_table[] = {
 		.procname	= "stat_refresh",
 		.data		= NULL,
 		.maxlen		= 0,
-		.mode		= 0600,
+		.mode		= 0444,
 		.proc_handler	= vmstat_refresh,
 	},
 #endif
