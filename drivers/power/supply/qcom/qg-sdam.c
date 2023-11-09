@@ -19,6 +19,11 @@
 #include "qg-sdam.h"
 #include "qg-reg.h"
 
+#undef pr_info
+#undef pr_debug
+#define pr_info(...) {}
+#define pr_debug(...) {}
+
 static struct qg_sdam *the_chip;
 
 struct qg_sdam_info {

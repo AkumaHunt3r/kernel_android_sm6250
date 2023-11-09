@@ -44,7 +44,12 @@
 #include "qg-battery-profile.h"
 #include "qg-defs.h"
 
-static int qg_debug_mask = QG_DEBUG_PON | QG_DEBUG_PROFILE | QG_DEBUG_SOC;
+#undef pr_info
+#undef pr_debug
+#define pr_info(...) {}
+#define pr_debug(...) {}
+
+static int qg_debug_mask;
 module_param_named(
 	debug_mask, qg_debug_mask, int, 0600
 );

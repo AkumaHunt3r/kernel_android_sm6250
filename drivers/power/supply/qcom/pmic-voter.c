@@ -21,6 +21,11 @@
 
 #include <linux/pmic-voter.h>
 
+#undef pr_info
+#undef pr_debug
+#define pr_info(...) {}
+#define pr_debug(...) {}
+
 #define NUM_MAX_CLIENTS		32
 #define DEBUG_FORCE_CLIENT	"DEBUG_FORCE_CLIENT"
 

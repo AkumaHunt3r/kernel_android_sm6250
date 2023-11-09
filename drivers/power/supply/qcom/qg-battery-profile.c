@@ -26,6 +26,11 @@
 #include "qg-profile-lib.h"
 #include "qg-defs.h"
 
+#undef pr_info
+#undef pr_debug
+#define pr_info(...) {}
+#define pr_debug(...) {}
+
 struct qg_battery_data {
 	/* battery-data class node */
 	dev_t				dev_no;
