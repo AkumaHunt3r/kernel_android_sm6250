@@ -4400,7 +4400,6 @@ static int evict_pages(struct lruvec *lruvec, struct scan_control *sc, int swapp
 	spin_unlock_irq(&pgdat->lru_lock);
 
 	mem_cgroup_uncharge_list(&list);
-	free_hot_cold_page_list(&list, true);
 
 	sc->nr_reclaimed += reclaimed;
 
