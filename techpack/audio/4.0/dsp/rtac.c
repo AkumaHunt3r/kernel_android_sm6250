@@ -23,6 +23,12 @@
 #include <dsp/q6voice.h>
 #include "adsp_err.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
 
 /* Max size of payload (buf size - apr header) */
 #define MAX_PAYLOAD_SIZE		4076

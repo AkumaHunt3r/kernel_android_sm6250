@@ -5,6 +5,13 @@
 #include <linux/syscalls.h>
 #include <linux/fs.h>
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 /*Master Control to Bypass the Smartamp TI CAPIv2 module*/
 static int s_tas_smartamp_bypass = 0;
 static int s_tas_smartamp_enable = 0;

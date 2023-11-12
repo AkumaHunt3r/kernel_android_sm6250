@@ -34,13 +34,7 @@
 #include <linux/uaccess.h>
 #include <linux/pmic-voter.h>
 
-#define fg_dbg(fg, reason, fmt, ...)			\
-	do {							\
-		if (*fg->debug_mask & (reason))		\
-			pr_info(fmt, ##__VA_ARGS__);	\
-		else						\
-			pr_debug(fmt, ##__VA_ARGS__);	\
-	} while (0)
+#define fg_dbg(fg, reason, fmt, ...) do {} while (0)
 
 #define is_between(left, right, value) \
 		(((left) >= (right) && (left) >= (value) \

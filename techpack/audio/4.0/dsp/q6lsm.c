@@ -27,6 +27,13 @@
 #include <dsp/audio_cal_utils.h>
 #include "adsp_err.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 #define APR_TIMEOUT	(HZ)
 #define LSM_ALIGN_BOUNDARY 512
 #define LSM_SAMPLE_RATE 16000

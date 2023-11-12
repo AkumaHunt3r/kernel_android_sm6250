@@ -12,6 +12,13 @@
 #include <ipc/apr_us.h>
 #include "q6usm.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 #define ADSP_MEMORY_MAP_SHMEM8_4K_POOL 3
 
 #define MEM_4K_OFFSET 4095

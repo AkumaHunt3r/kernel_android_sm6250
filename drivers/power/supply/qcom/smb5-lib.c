@@ -37,6 +37,13 @@
 #endif
 /*part of charger mode function*/
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 typedef struct touchscreen_usb_piugin_data{
 	bool valid;
 	bool usb_plugged_in;
@@ -46,19 +53,8 @@ typedef struct touchscreen_usb_piugin_data{
 touchscreen_usb_piugin_data_t g_touchscreen_usb_pulgin = {0};
 EXPORT_SYMBOL(g_touchscreen_usb_pulgin);
 
-#define smblib_err(chg, fmt, ...)		\
-	pr_err("%s: %s: " fmt, chg->name,	\
-		__func__, ##__VA_ARGS__)	\
-
-#define smblib_dbg(chg, reason, fmt, ...)			\
-	do {							\
-		if (*chg->debug_mask & (reason))		\
-			pr_info("%s: %s: " fmt, chg->name,	\
-				__func__, ##__VA_ARGS__);	\
-		else						\
-			pr_debug("%s: %s: " fmt, chg->name,	\
-				__func__, ##__VA_ARGS__);	\
-	} while (0)
+#define smblib_err(chg, fmt, ...) do {} while (0)
+#define smblib_dbg(chg, reason, fmt, ...) do {} while (0)
 
 #define typec_rp_med_high(chg, typec_mode)			\
 	((typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM	\

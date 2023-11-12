@@ -46,8 +46,10 @@
 
 #undef pr_info
 #undef pr_debug
-#define pr_info(...) {}
-#define pr_debug(...) {}
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
 
 static int qg_debug_mask;
 module_param_named(

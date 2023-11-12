@@ -16,6 +16,13 @@
 #include "qg-profile-lib.h"
 #include "qg-defs.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 int qg_linear_interpolate(int y0, int x0, int y1, int x1, int x)
 {
 	if (y0 == y1 || x == x0)

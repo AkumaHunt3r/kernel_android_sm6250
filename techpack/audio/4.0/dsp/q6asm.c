@@ -42,6 +42,13 @@
 #include <dsp/q6core.h>
 #include "adsp_err.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 #define TIMEOUT_MS  1000
 #define TRUE        0x01
 #define FALSE       0x00

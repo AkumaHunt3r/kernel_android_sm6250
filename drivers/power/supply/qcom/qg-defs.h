@@ -13,7 +13,7 @@
 #ifndef __QG_DEFS_H__
 #define __QG_DEFS_H__
 
-#define qg_dbg(chip, reason, fmt, ...) {}
+#define qg_dbg(chip, reason, fmt, ...) do {} while (0)
 
 #define is_between(left, right, value) \
 		(((left) >= (right) && (left) >= (value) \

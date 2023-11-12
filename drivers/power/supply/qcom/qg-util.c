@@ -26,6 +26,13 @@
 #include "qg-defs.h"
 #include "qg-util.h"
 
+#undef pr_info
+#undef pr_debug
+#undef pr_err
+#define pr_info(...) do {} while (0)
+#define pr_debug(...) do {} while (0)
+#define pr_err(...) do {} while (0)
+
 static inline bool is_sticky_register(u32 addr)
 {
 	if ((addr & 0xFF) == QG_STATUS2_REG)
