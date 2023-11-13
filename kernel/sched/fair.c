@@ -4406,7 +4406,7 @@ pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 
 #ifdef CONFIG_SCHED_BORE
 	if (cfs_rq->next && wakeup_preempt_entity_bscale(
-		                  cfs_rq->next, left, sched_bore & 2) < 1)
+		                  cfs_rq->next, left, sched_bore & 2) < 1) {
 #else
 	if (cfs_rq->next && wakeup_preempt_entity(cfs_rq->next, left) < 1) {
 #endif
