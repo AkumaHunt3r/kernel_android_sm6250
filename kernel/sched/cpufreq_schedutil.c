@@ -193,7 +193,7 @@ static void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
 	if (!sugov_update_next_freq(sg_policy, time, next_freq))
 		return;
 
-	if (use_pelt())
+	if (likely(use_pelt()))
 		sg_policy->work_in_progress = true;
 	irq_work_queue(&sg_policy->irq_work);
 }
@@ -332,8 +332,10 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 	unsigned int next_f;
 	bool busy;
 
+#ifdef CONFIG_SCHED_WALT
 	if (flags & SCHED_CPUFREQ_PL)
 		return;
+#endif
 
 	sugov_set_iowait_boost(sg_cpu, time, flags);
 	sg_cpu->last_update = time;
@@ -348,7 +350,7 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 	if (!sugov_should_update_freq(sg_policy, time))
 		return;
 
-	busy = use_pelt() && sugov_cpu_is_busy(sg_cpu);
+	busy = likely(use_pelt()) && sugov_cpu_is_busy(sg_cpu);
 
 	if (0) {
 		sg_policy->cached_raw_freq = sg_policy->prev_cached_raw_freq;
@@ -436,8 +438,10 @@ static void sugov_update_shared(struct update_util_data *hook, u64 time,
 	unsigned long util, max;
 	unsigned int next_f;
 
+#ifdef CONFIG_SCHED_WALT
 	if (flags & SCHED_CPUFREQ_PL)
 		return;
+#endif
 
 	sugov_get_util(&util, &max, sg_cpu->cpu);
 
