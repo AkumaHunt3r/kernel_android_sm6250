@@ -97,6 +97,7 @@
 #include <linux/cpu_input_boost.h>
 #include <linux/devfreq_boost.h>
 #include <linux/simple_lmk.h>
+#include <linux/irq.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -2240,6 +2241,9 @@ long _do_fork(unsigned long clone_flags,
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 50);
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
 		cpu_input_boost_kick_max(50);
+
+		/* Invoke SBalance to do IRQ balancing. */
+		balance_irqs();
 	}
 
 	/*
