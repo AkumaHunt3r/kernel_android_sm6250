@@ -20,6 +20,7 @@
 #include <linux/ftrace.h>
 #include <linux/mm.h>
 #include <linux/msm_adreno_devfreq.h>
+#include <linux/kprofiles.h>
 #include <asm/cacheflush.h>
 #include <soc/qcom/scm.h>
 #include "governor.h"
@@ -41,6 +42,11 @@ static DEFINE_SPINLOCK(tz_lock);
  * frame length, but less than the idle timer.
  */
 #define CEILING			50000
+/*
+ * Optimized ceiling to benefit gpu processing with quick drops in utilization
+ * example being gpu accelerated encoding.
+ */
+#define CEILING_OPT		25000
 #define TZ_RESET_ID		0x3
 #define TZ_UPDATE_ID		0x4
 #define TZ_INIT_ID		0x6
@@ -335,6 +341,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 	int val, level = 0;
 	unsigned int scm_data[4];
 	int context_count = 0;
+	unsigned int ceiling = CEILING_OPT;
 
 	/* keeps stats.private_data == NULL   */
 	result = devfreq->profile->get_dev_status(devfreq->dev.parent, &stats);
@@ -370,12 +377,15 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq)
 		return level;
 	}
 
+	if (kp_active_mode() == 1)
+		ceiling = CEILING;
+
 	/*
 	 * If there is an extended block of busy processing,
 	 * increase frequency.  Otherwise run the normal algorithm.
 	 */
 	if (!priv->disable_busy_time_burst &&
-			priv->bin.busy_time > CEILING) {
+			priv->bin.busy_time > ceiling) {
 		val = -1 * level;
 	} else {
 
