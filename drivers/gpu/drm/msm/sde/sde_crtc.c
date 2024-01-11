@@ -5236,7 +5236,7 @@ static int _sde_crtc_check_secure_state(struct drm_crtc *crtc,
 	return 0;
 }
 
-static int sde_crtc_atomic_check(struct drm_crtc *crtc,
+static inline int sde_crtc_atomic_check(struct drm_crtc *crtc,
 		struct drm_crtc_state *state)
 {
 	struct drm_device *dev;
