@@ -29,6 +29,7 @@
 #include <linux/oom.h>
 #include <linux/sched/debug.h>
 #include <linux/smpboot.h>
+#include <linux/kprofiles.h>
 #include <uapi/linux/sched/types.h>
 #include "../time/tick-internal.h"
 
@@ -1096,8 +1097,6 @@ static bool rcu_is_callbacks_kthread(void)
 	return __this_cpu_read(rcu_cpu_kthread_task) == current;
 }
 
-extern int kp_active_mode(void);
-
 #define RCU_BOOST_DELAY_JIFFIES DIV_ROUND_UP(CONFIG_RCU_BOOST_DELAY * HZ, 1000)
 
 /*
@@ -1106,12 +1105,15 @@ extern int kp_active_mode(void);
 static void rcu_preempt_boost_start_gp(struct rcu_node *rnp)
 {
 	switch (kp_active_mode()) {
-	case 3:
-		rnp->boost_time = jiffies;
 	case 1:
 		rnp->boost_time = jiffies + (RCU_BOOST_DELAY_JIFFIES * 2);
+		break;
+	case 3:
+		rnp->boost_time = jiffies;
+		break;
 	default:
 		rnp->boost_time = jiffies + RCU_BOOST_DELAY_JIFFIES;
+		break;
 	}
 }
 
