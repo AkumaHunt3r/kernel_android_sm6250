@@ -98,6 +98,7 @@
 #include <linux/devfreq_boost.h>
 #include <linux/simple_lmk.h>
 #include <linux/irq.h>
+#include <linux/kprofiles.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -2235,11 +2236,30 @@ long _do_fork(unsigned long clone_flags,
 	int trace = 0;
 	long nr;
 
-	/* Boost DDR bus and CPU to the max for 50 ms when userspace launches an app. */
+	/* Boost DDR and CPU during app launch, according to the active KProfile.
+	 * IRQ balancing is unconditional.
+	*/
+	int df_boost_duration, cpu_boost_duration;
 	if (task_is_zygote(current) && df_boost_within_input(1000)) {
-		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 50);
-		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 50);
-		cpu_input_boost_kick_max(50);
+		switch (kp_active_mode()) {
+		case 0:
+		case 1:
+			df_boost_duration = 0;
+			cpu_boost_duration = 0;
+			break;
+		case 2:
+			df_boost_duration = 120;
+			cpu_boost_duration = 60;
+			break;
+		case 3:
+			df_boost_duration = 500;
+			cpu_boost_duration = 500;
+			break;
+		}
+
+		cpu_input_boost_kick_max(cpu_boost_duration);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, df_boost_duration);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, df_boost_duration);
 
 		/* Invoke SBalance to do IRQ balancing. */
 		balance_irqs();
