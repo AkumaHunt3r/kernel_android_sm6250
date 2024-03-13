@@ -117,6 +117,8 @@ void kp_set_mode_rollback(unsigned int level, unsigned int duration_ms)
 		return;
 	}
 
+	kp_info("Mode rollebacked to level %d for %d ms\n", level, duration_ms);
+
 	kp_override_mode = level;
 	kp_override = true;
 	kp_trigger_mode_change_event();
@@ -133,6 +135,7 @@ static __always_inline int __kp_set_mode(unsigned int level)
 		return -EINVAL;
 
 	kp_mode = level;
+	kp_info("Mode set to level %d\n", level);
 	return 0;
 }
 
