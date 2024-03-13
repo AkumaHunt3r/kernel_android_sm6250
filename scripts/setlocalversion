@@ -51,8 +51,10 @@ scm_version()
 		# it, because this version is defined in the top level Makefile.
 		if [ -z "`git describe --exact-match 2>/dev/null`" ]; then
 
-			# Append .version string to the version and bail out.
-			printf '/%s' "$(cat .version)"
+			# Append the .version file and last commit hash to the name.
+			# After that, immediately bail out.
+			last_commit_hash=$(git rev-parse --short HEAD)
+			printf '/%s/%s' "$(cat .version)" "$last_commit_hash"
 			return
 
 			# If only the short version is requested, don't bother
