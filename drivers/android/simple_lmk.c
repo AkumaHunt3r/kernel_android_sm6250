@@ -26,11 +26,6 @@
 /* Timeout in jiffies for each reclaim */
 #define RECLAIM_EXPIRES msecs_to_jiffies(CONFIG_ANDROID_SIMPLE_LMK_TIMEOUT_MSEC)
 
-#define ADJ_MAX 1000
-#define ADJ_DIVISOR 50
-static int lmk_count[(ADJ_MAX / ADJ_DIVISOR) + 1];
-module_param_array(lmk_count, int, NULL, S_IRUGO);
-
 struct victim_info {
 	struct task_struct *tsk;
 	struct mm_struct *mm;
@@ -48,6 +43,10 @@ static bool reclaim_active;
 static atomic_t needs_reclaim = ATOMIC_INIT(0);
 static atomic_t needs_reap = ATOMIC_INIT(0);
 static atomic_t nr_killed = ATOMIC_INIT(0);
+
+/* Tracks how many victims were killed. */
+static int lmk_count;
+module_param(lmk_count, int, 0644);
 
 static int victim_cmp(const void *lhs_ptr, const void *rhs_ptr)
 {
@@ -209,7 +208,6 @@ static void scan_and_kill(void)
 {
 	int i, nr_to_kill, nr_found = 0;
 	unsigned long pages_found;
-	int adj_index;
 
 	/*
 	 * Reset nr_victims so the reaper thread and simple_lmk_mm_freed() are
@@ -266,12 +264,8 @@ static void scan_and_kill(void)
 			vtsk->signal->oom_score_adj,
 			victim->size << (PAGE_SHIFT - 10));
 
-		/* Count kills */
-		adj_index = vtsk->signal->oom_score_adj / ADJ_DIVISOR;
-		if (adj_index > (ADJ_MAX / ADJ_DIVISOR))
-			adj_index = (ADJ_MAX / ADJ_DIVISOR);
-		lmk_count[adj_index]++;
-
+		/* Increase amount of kills. */
+		lmk_count++;
 
 		/* Make the victim reap anonymous memory first in exit_mmap() */
 		set_bit(MMF_OOM_VICTIM, &mm->flags);
