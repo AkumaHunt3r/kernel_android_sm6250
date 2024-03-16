@@ -48,6 +48,10 @@ static atomic_t nr_killed = ATOMIC_INIT(0);
 static int lmk_count;
 module_param(lmk_count, int, 0644);
 
+/* Tracks how much memory was reclaimed. */
+static unsigned long memory_reclaimed;
+module_param(memory_reclaimed, ulong, 0644);
+
 static int victim_cmp(const void *lhs_ptr, const void *rhs_ptr)
 {
 	const struct victim_info *lhs = (typeof(lhs))lhs_ptr;
@@ -207,7 +211,7 @@ static void set_task_rt_prio(struct task_struct *tsk, int priority)
 static void scan_and_kill(void)
 {
 	int i, nr_to_kill, nr_found = 0;
-	unsigned long pages_found;
+	unsigned long pages_found, reclaimed;
 
 	/*
 	 * Reset nr_victims so the reaper thread and simple_lmk_mm_freed() are
@@ -254,18 +258,26 @@ static void scan_and_kill(void)
 	reclaim_active = true;
 	write_unlock(&mm_free_lock);
 
+	/*
+	 * Reset the memory we had reclaimed.
+	 * We only need of the last reclaiming, so this is desired.
+	*/
+	memory_reclaimed = 0;
+
 	/* Kill the victims */
 	for (i = 0; i < nr_to_kill; i++) {
 		struct victim_info *victim = &victims[i];
 		struct task_struct *t, *vtsk = victim->tsk;
 		struct mm_struct *mm = victim->mm;
 
+		reclaimed = victim->size << (PAGE_SHIFT - 10);
 		pr_info("Killing %s with adj %d to free %lu KiB\n", vtsk->comm,
 			vtsk->signal->oom_score_adj,
-			victim->size << (PAGE_SHIFT - 10));
+			reclaimed);
 
-		/* Increase amount of kills. */
+		/* Increase amount of kills and reclaimed memory. */
 		lmk_count++;
+		memory_reclaimed += reclaimed;
 
 		/* Make the victim reap anonymous memory first in exit_mmap() */
 		set_bit(MMF_OOM_VICTIM, &mm->flags);
