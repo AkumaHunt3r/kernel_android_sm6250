@@ -2235,6 +2235,7 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 	unsigned plane_mask;
 	int ret = 0;
 	unsigned int i, j, num_fences;
+	int kp_mode;
 
 	/* disallow for drivers not supporting atomic: */
 	if (!drm_core_check_feature(dev, DRIVER_ATOMIC))
@@ -2262,18 +2263,16 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 			(arg->flags & DRM_MODE_PAGE_FLIP_EVENT))
 		return -EINVAL;
 
-	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) &&
-		(df_boost_within_input(3250))) {
-		switch (kp_active_mode()) {
-		case 2:
+	/* CPU and/or DDR boosting during frame rendering. */
+	kp_mode = kp_active_mode();
+	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) && (kp_mode != 0)) {
+		if (kp_mode == 2 && df_boost_within_input(3250)) {
 			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 60);
 			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 60);
-			break;
-		case 3:
+		} else if (kp_mode == 3) {
 			cpu_input_boost_kick_max(60);
 			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 120);
 			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 120);
-			break;
 		}
 	}
 
