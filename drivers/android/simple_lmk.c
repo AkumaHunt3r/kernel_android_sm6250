@@ -48,9 +48,13 @@ static atomic_t nr_killed = ATOMIC_INIT(0);
 static int lmk_count;
 module_param(lmk_count, int, 0644);
 
-/* Tracks how much memory was reclaimed. */
-static unsigned long memory_reclaimed;
-module_param(memory_reclaimed, ulong, 0644);
+/* Tracks how much memory was reclaimed last time. */
+static unsigned long last_memory_reclaimed;
+module_param(last_memory_reclaimed, ulong, 0644);
+
+/* Tracks how much memory was reclaimed in total. */
+static unsigned long total_memory_reclaimed;
+module_param(total_memory_reclaimed, ulong, 0644);
 
 static int victim_cmp(const void *lhs_ptr, const void *rhs_ptr)
 {
@@ -258,11 +262,8 @@ static void scan_and_kill(void)
 	reclaim_active = true;
 	write_unlock(&mm_free_lock);
 
-	/*
-	 * Reset the memory we had reclaimed.
-	 * We only need of the last reclaiming, so this is desired.
-	*/
-	memory_reclaimed = 0;
+	/* Reset the memory we had reclaimed last time. */
+	last_memory_reclaimed = 0;
 
 	/* Kill the victims */
 	for (i = 0; i < nr_to_kill; i++) {
@@ -277,7 +278,8 @@ static void scan_and_kill(void)
 
 		/* Increase amount of kills and reclaimed memory. */
 		lmk_count++;
-		memory_reclaimed += reclaimed;
+		last_memory_reclaimed += reclaimed;
+		total_memory_reclaimed += reclaimed;
 
 		/* Make the victim reap anonymous memory first in exit_mmap() */
 		set_bit(MMF_OOM_VICTIM, &mm->flags);
