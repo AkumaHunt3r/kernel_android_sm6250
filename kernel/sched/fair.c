@@ -8900,11 +8900,10 @@ static void check_preempt_wakeup(struct rq *rq, struct task_struct *p, int wake_
 	find_matching_se(&se, &pse);
 	update_curr(cfs_rq_of(se));
 	BUG_ON(!pse);
-	if (wakeup_preempt_entity(se, pse) == 1) {
 #ifdef CONFIG_SCHED_BORE
-	if (wakeup_preempt_entity_bscale(se, pse, sched_bore & 2) == 1)
+	if (wakeup_preempt_entity_bscale(se, pse, sched_bore & 2) == 1) {
 #else
-	if (wakeup_preempt_entity(se, pse) == 1)
+	if (wakeup_preempt_entity(se, pse) == 1) {
 #endif
 		/*
 		 * Bias pick_next to pick the sched entity that is
