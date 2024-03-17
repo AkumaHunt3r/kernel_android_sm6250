@@ -12,6 +12,7 @@
 #include <linux/msm_drm_notify.h>
 #include <linux/slab.h>
 #include <linux/version.h>
+#include <linux/kprofiles.h>
 
 /* The sched_param struct is located elsewhere in newer kernels */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
@@ -92,6 +93,9 @@ static void __cpu_input_boost_kick(struct boost_drv *b)
 	if (get_boost_state(b) & SCREEN_OFF)
 		return;
 
+	if (kp_active_mode() == 1)
+		return;
+
 	set_boost_bit(b, INPUT_BOOST);
 	wake_up(&b->boost_waitq);
 	mod_delayed_work(system_unbound_wq, &b->input_unboost,
@@ -115,6 +119,9 @@ static void __cpu_input_boost_kick_max(struct boost_drv *b,
 	unsigned long curr_expires, new_expires;
 
 	if (get_boost_state(b) & SCREEN_OFF)
+		return;
+
+	if (kp_active_mode() == 1)
 		return;
 
 	do {
