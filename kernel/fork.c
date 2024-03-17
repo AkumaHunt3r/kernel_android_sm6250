@@ -2240,21 +2240,19 @@ long _do_fork(unsigned long clone_flags,
 	/* Boost DDR and CPU during app launch, according to the active KProfile.
 	 * IRQ balancing is unconditional.
 	*/
-	int df_boost_duration, cpu_boost_duration;
+	int df_boost_duration, cpu_boost_duration = 0;
 	if (task_is_zygote(current) && df_boost_within_input(1000)) {
 		switch (kp_active_mode()) {
 		case 0:
-		case 1:
-			df_boost_duration = 0;
-			cpu_boost_duration = 0;
-			break;
 		case 2:
-			df_boost_duration = 120;
-			cpu_boost_duration = 60;
+			df_boost_duration = 100;
+			cpu_boost_duration = 100;
 			break;
 		case 3:
-			df_boost_duration = 500;
-			cpu_boost_duration = 500;
+			df_boost_duration = 1000;
+			cpu_boost_duration = 1000;
+			break;
+		default:
 			break;
 		}
 
