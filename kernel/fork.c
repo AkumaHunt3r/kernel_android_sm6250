@@ -2237,28 +2237,23 @@ long _do_fork(unsigned long clone_flags,
 	int trace = 0;
 	long nr;
 
-	/* Boost DDR and CPU during app launch, according to the active KProfile.
-	 * IRQ balancing is unconditional.
-	*/
-	int df_boost_duration, cpu_boost_duration = 0;
+	/* Boost DDR and CPU during app launch, according to the active KProfile. */
 	if (task_is_zygote(current) && df_boost_within_input(1000)) {
 		switch (kp_active_mode()) {
 		case 0:
 		case 2:
-			df_boost_duration = 100;
-			cpu_boost_duration = 100;
+			cpu_input_boost_kick();
+			devfreq_boost_kick(DEVFREQ_CPU_LLCC_BW);
+			devfreq_boost_kick(DEVFREQ_CPU_LLCC_DDR_BW);
 			break;
 		case 3:
-			df_boost_duration = 1000;
-			cpu_boost_duration = 1000;
+			cpu_input_boost_kick_max(1000);
+			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 1000);
+			devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 1000);
 			break;
 		default:
 			break;
 		}
-
-		cpu_input_boost_kick_max(cpu_boost_duration);
-		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, df_boost_duration);
-		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, df_boost_duration);
 	}
 
 	/*
