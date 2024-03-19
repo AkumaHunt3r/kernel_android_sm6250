@@ -2259,9 +2259,6 @@ long _do_fork(unsigned long clone_flags,
 		cpu_input_boost_kick_max(cpu_boost_duration);
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, df_boost_duration);
 		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, df_boost_duration);
-
-		/* Invoke SBalance to do IRQ balancing. */
-		balance_irqs();
 	}
 
 	/*
