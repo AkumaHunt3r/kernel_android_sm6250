@@ -4,11 +4,7 @@
  * them to run sooner, but does not allow tons of sleepers to
  * rip the spread apart.
  */
-#ifdef CONFIG_SCHED_BORE
 #define SCHED_FEAT_GENTLE_FAIR_SLEEPERS 0
-#else
-#define SCHED_FEAT_GENTLE_FAIR_SLEEPERS 0
-#endif
 
 /*
  * Place new tasks ahead so that they do not starve already running
