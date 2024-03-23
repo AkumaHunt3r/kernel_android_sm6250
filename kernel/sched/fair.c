@@ -152,7 +152,7 @@ const_debug unsigned int sysctl_sched_migration_cost	= 1000000UL;
 DEFINE_PER_CPU_READ_MOSTLY(int, sched_load_boost);
 
 #ifdef CONFIG_SCHED_BORE
-unsigned int __read_mostly sched_bore                = 0;
+unsigned int __read_mostly sched_bore                = 1;
 unsigned int __read_mostly sched_burst_penalty_scale = 1280;
 unsigned int __read_mostly sched_burst_granularity   = 12;
 unsigned int __read_mostly sched_burst_smoothness    = 2;
