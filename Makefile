@@ -707,38 +707,46 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS   += -Os -pipe
-KBUILD_AFLAGS	+= -Os -pipe
+KBUILD_CFLAGS	+= -Os
+KBUILD_AFLAGS	+= -Os
 else
-KBUILD_CFLAGS   += -O3 -pipe
-KBUILD_AFLAGS	+= -O3 -pipe
+KBUILD_CFLAGS	+= -O3
+KBUILD_AFLAGS	+= -O3
 endif
 
+KBUILD_CFLAGS	+= -pipe
+KBUILD_AFLAGS	+= -pipe
+
 ifeq ($(cc-name),clang)
-INLINE_FLAGS := -mllvm -inline-threshold=2000 \
-	-mllvm -inlinehint-threshold=2000 \
-	-mllvm -unroll-threshold=1200 \
-	-mllvm -import-instr-limit=40
+INLINE_FLAGS := -mllvm -inline-threshold=5000 \
+	-mllvm -inlinehint-threshold=5000
 
-CPU_FLAGS := -march=armv8.2-a+crypto+crc \
-	-mcpu=cortex-a55+crypto+crc
+CPU_FLAGS := -march=armv8.2-a+crypto+crc+lse \
+	-mcpu=cortex-a55+crypto+crc+lse
 
-POLLY_FLAGS := -mllvm -polly-ast-use-context \
-	-mllvm -polly-invariant-load-hoisting \
+POLLY_FLAGS := -mllvm -polly \
+	-mllvm -polly-postopts \
+	-mllvm -polly-ast-use-context \
+	-mllvm -polly-ast-detect-parallel \
 	-mllvm -polly-run-inliner \
-	-mllvm -polly-vectorizer=stripmine \
-	-mllvm -polly-loopfusion-greedy=1 \
-	-mllvm -polly-reschedule=1 \
-	-mllvm -polly-postopts=1 \
-	-mllvm -polly-scheduling=dynamic \
-	-mllvm -polly-scheduling-chunksize=1
+	-mllvm -polly-reschedule \
+	-mllvm -polly-loopfusion-greedy \
+	-mllvm -polly-vectorizer=stripmine
 
 ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 POLLY_FLAGS += -mllvm -polly-run-dce
 endif
 
-KBUILD_CFLAGS += $(CPU_FLAGS) $(POLLY_FLAGS) $(INLINE_FLAGS)
-KBUILD_AFLAGS += $(CPU_FLAGS) $(POLLY_FLAGS) $(INLINE_FLAGS)
+EXTRA_FLAGS := -mllvm -hot-cold-split=true \
+	-ffp-contract=fast
+
+ALL_FLAGS := $(CPU_FLAGS) \
+	$(POLLY_FLAGS) \
+	$(INLINE_FLAGS) \
+	$(EXTRA_FLAGS)
+
+KBUILD_CFLAGS += $(ALL_FLAGS)
+KBUILD_AFLAGS += $(ALL_FLAGS)
 endif
 
 ifdef CONFIG_MINIMAL_TRACING_FOR_IORAP
