@@ -72,6 +72,7 @@
 #include <linux/psi.h>
 #include <linux/cpu_input_boost.h>
 #include <linux/devfreq_boost.h>
+#include <linux/kprofiles.h>
 
 #include <asm/sections.h>
 #include <asm/tlbflush.h>
@@ -4386,8 +4387,20 @@ retry:
 	if (costly_order && !(gfp_mask & __GFP_RETRY_MAYFAIL))
 		goto nopage;
 
-	cpu_input_boost_kick_max(100);
-	devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 100);
+	switch (kp_active_mode()) {
+	case 2:
+		cpu_input_boost_kick_max(100);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 100);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 100);
+		break;
+	case 3:
+		cpu_input_boost_kick_max(200);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_BW, 200);
+		devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 200);
+		break;
+	default:
+		break;
+	}
 
 	if (should_reclaim_retry(gfp_mask, order, ac, alloc_flags,
 				 did_some_progress > 0, &no_progress_loops))
